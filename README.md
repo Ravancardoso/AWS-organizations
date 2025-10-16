@@ -29,7 +29,7 @@ Siga os passos abaixo na sua máquina local, garantindo que você esteja autenti
 
 1.  **Clonar o Repositório:**
     ```bash
-    git clone <URL_DO_REPOSITÓRIO>
+    git clone https://github.com/Ravancardoso/AWS-organizations.git
     cd terraform-aws-organizations
     ```
 
