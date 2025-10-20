@@ -1,0 +1,32 @@
+# Terraform directories and files
+**/.terraform/
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+tfplan.out
+
+# Crash logs
+**/crash.log
+
+# Sensitive variable files
+*.tfvars
+
+# Terraform overrides
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform CLI configs
+.terraformrc
+terraform.rc
+
+# IDE/editor and temp files
+*.swp
+.idea/
+**/.idea/
+plan.json
+temp*
+
+# Workspace configs
+*.code-workspace
