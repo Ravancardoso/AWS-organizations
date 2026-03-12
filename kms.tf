@@ -17,7 +17,7 @@ data "aws_iam_policy_document" "kms_key_policy" {
     effect = "Allow"
     principals {
       type        = "AWS"
-      identifiers = ["arn:aws:iam::${data.aws_organizations_organization.current.master_account_id}:root"]
+      identifiers = ["arn:aws:iam::${aws_organizations_organization.main.master_account_id}:root"]
     }
     actions   = ["kms:*"]
     resources = ["*"]

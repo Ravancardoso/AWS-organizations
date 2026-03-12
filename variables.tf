@@ -44,13 +44,3 @@ variable "sandbox_budget_limit" {
   type        = number
   default     = 100.00
 }
-
-variable "tags" {
-  description = "Default resource tags."
-  type        = map(string)
-  default = {
-    Ambiente     = "Security"
-    Proprietario = "Ravan Cardoso"
-    Custo        = "100.00"
-  }
-}

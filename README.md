@@ -54,13 +54,17 @@ Siga os passos abaixo na sua máquina local, garantindo que você esteja autenti
 
 O código está organizado da seguinte forma:
 
-| Arquivo/Diretório | Objetivo |
+| Arquivo | Objetivo |
 | :--- | :--- |
-| `versions.tf` | Define o provedor AWS e a versão mínima do Terraform. |
-| `organization.tf` | Cria o recurso central da Organization e integrações de serviço (SSO, CloudTrail). |
-| `ous.tf` | Define a hierarquia e os nomes de todas as Unidades Organizacionais. |
-| `accounts.tf` | Provisiona novas Contas Membro (ex: Log Archive, Audit). |
-| `policies/` | Diretório contendo os arquivos JSON para as Service Control Policies (SCPs). |
+| `main.tf` | Configurações do Terraform e definição de provedores. |
+| `variables.tf` | Declaração de todas as variáveis utilizadas no provisionamento. |
+| `organizations.tf` | Cria a AWS Organization, OUs (Security, Workloads, Sandbox) e Contas Membro. |
+| `sso.tf` | Configuração do IAM Identity Center (SSO), Permission Sets e Associações. |
+| `iam.tf` | Service Control Policies (SCPs) para governança (restrição de região e tags). |
+| `cloudtrail.tf` | Configuração do CloudTrail organizacional (envio para S3 e CloudWatch). |
+| `buckets.tf` | Bucket S3 centralizado seguro para armazenamento de logs da organização. |
+| `kms.tf` | Gerenciamento de chaves KMS para criptografia de logs. |
+| `billing.tf` | Orçamentos e alertas (AWS Budgets) para a Conta Master e OUs. |
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 

@@ -2,10 +2,10 @@
 resource "aws_s3_bucket" "cloudtrail_logs" {
   bucket = "cloudtrail-logs-${lower(var.organization_name)}-${aws_organizations_organization.main.master_account_id}"
 
-  tags = {
+  tags = merge(local.default_tags, local.environment_tags, {
     Name     = "CloudTrail Centralized Logs"
     Resource = "S3"
-  }
+  })
 }
 
 # Enforce bucket owner as object owner
