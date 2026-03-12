@@ -1,49 +1,56 @@
-
-# VARIÁVEIS 
-
-
 variable "aws_region" {
-  description = "Região principal para a Organization. DEVE ser us-east-1 para recursos da Org e SSO."
+  description = "Primary region. MUST be us-east-1 for Org and SSO resources."
   type        = string
   default     = "us-east-1"
 }
 
 variable "organization_name" {
-  description = "Nome para identificar a Organization e suas contas."
+  description = "Organization and account name identifier."
   type        = string
   default     = "MinhaEmpresa-Org"
 }
 
 variable "master_account_email" {
-  description = "E-mail da conta principal (Management Account). NÃO pode ser alterado após a criação."
+  description = "Management Account email (immutable)."
   type        = string
- 
- }
-
-variable "root_ou_name" {
-  description = "Nome da Unidade Organizacional (OU) raiz para a maioria das OUs."
-  type        = string
-  default     = "Root" 
 }
 
-variable "tags" {
-  description = "Tags padrão para aplicar na maioria dos recursos da AWS."
-  type        = map(string)
-  default = {
-    Ambiente    = "Producao"
-    Proprietario = "Infra-Team"
-    Custo        = "0000"
-  }
+variable "org_prefix" {
+  description = "Prefix for account names."
+  type        = string
+  default     = "MinhaEmpresa"
+}
+
+variable "base_domain" {
+  description = "Base domain for member account emails."
+  type        = string
+  default     = "seu-dominio.com"
+}
+
+variable "allowed_regions" {
+  description = "Allowed AWS regions for resource provisioning (used in SCPs)."
+  type        = list(string)
+  default     = ["us-east-1"]
 }
 
 variable "billing_contacts" {
-  description = "Lista de e-mails para receber notificações de orçamento (Budgets)."
+  description = "Emails for budget notifications."
   type        = list(string)
   default     = ["financeiro@suaempresa.com", "infra-team@suaempresa.com"]
 }
 
 variable "sandbox_budget_limit" {
-  description = "Limite máximo de gasto mensal (em USD) para a OU Sandbox."
+  description = "Monthly spend limit (USD) for Sandbox OU."
   type        = number
   default     = 100.00
+}
+
+variable "tags" {
+  description = "Default resource tags."
+  type        = map(string)
+  default = {
+    Ambiente     = "Security"
+    Proprietario = "Ravan Cardoso"
+    Custo        = "100.00"
+  }
 }

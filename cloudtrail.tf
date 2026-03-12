@@ -1,32 +1,23 @@
-# ------------------------------------------------------------------
-# 1. RECURSO PRINCIPAL: AWS CLOUDTRAIL (Organization Trail)
-# ------------------------------------------------------------------
-
-# Este recurso criará o CloudTrail em TODAS as contas da sua AWS Organization.
-# O log de eventos será enviado para o bucket S3 centralizado.
+# Organization-wide CloudTrail trailing to central S3 bucket
 resource "aws_cloudtrail" "organization_trail" {
   name                          = "${var.organization_name}-Organization-Trail"
-  s3_bucket_name                = aws_s3_bucket.cloudtrail_logs.id # Referencia o bucket criado em buckets.tf
-  is_organization_trail         = true # ESSENCIAL: Cria o Trail em todas as contas.
-  is_multi_region_trail         = true # Recomendado: Rastreia eventos em todas as regiões AWS
-  include_global_service_events = true # Recomendado: Inclui eventos globais (IAM, S3, CloudFront)
+  s3_bucket_name                = aws_s3_bucket.cloudtrail_logs.id
+  is_organization_trail         = true
+  is_multi_region_trail         = true
+  include_global_service_events = true
 
-  # Permite que o CloudTrail use logs do CloudWatch para alertas em tempo real
-  cloud_watch_logs_role_arn = aws_iam_role.cloudtrail_logs.arn
+  # Allow CloudTrail to use CloudWatch logs for real-time alerts
+  cloud_watch_logs_role_arn  = aws_iam_role.cloudtrail_logs.arn
   cloud_watch_logs_group_arn = "${aws_cloudwatch_log_group.cloudtrail_logs.arn}:*"
 }
 
-# ------------------------------------------------------------------
-# 2. RECURSOS DE SUPORTE: IAM E CLOUDWATCH
-# ------------------------------------------------------------------
-
-# 2.1. GRUPO DE LOGS NO CLOUDWATCH (para visualização e alertas)
+# CloudWatch Log Group for CloudTrail alerts
 resource "aws_cloudwatch_log_group" "cloudtrail_logs" {
   name              = "/aws/cloudtrail/${var.organization_name}-Organization-Trail"
-  retention_in_days = 90 # Configuração de retenção para logs (ajuste conforme necessário)
+  retention_in_days = 90
 }
 
-# 2.2. ROLE IAM PARA PERMITIR QUE CLOUDTRAIL ESCREVA NO CLOUDWATCH
+# IAM role to allow CloudTrail to write to CloudWatch
 data "aws_iam_policy_document" "cloudtrail_assume_role" {
   statement {
     sid     = "CloudTrailAssumeRole"
@@ -44,7 +35,7 @@ resource "aws_iam_role" "cloudtrail_logs" {
   assume_role_policy = data.aws_iam_policy_document.cloudtrail_assume_role.json
 }
 
-# 2.3. POLICY IAM PARA PERMITIR QUE CLOUDTRAIL ESCREVA NO LOG GROUP
+# IAM policy for CloudTrail CloudWatch writes
 data "aws_iam_policy_document" "cloudtrail_put_logs" {
   statement {
     sid    = "CloudTrailAccess"

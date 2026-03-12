@@ -1,55 +1,54 @@
-# ------------------------------------------------------------------
-# 1. HABILITAR O IAM IDENTITY CENTER (SSO)
-# ------------------------------------------------------------------
+# IAM Identity Center (SSO) Data Source
 
-# Isto cria a instância do Identity Center na sua Organization
-resource "aws_ssoadmin_instance_access_control_attribute_configuration" "sso_enable" {
-  instance_arn = aws_ssoadmin_instances.sso_instance.arns[0]
-  # Configuração mínima, apenas para garantir que a instância seja criada
-}
-
-# Obtém a instância do SSO que acabou de ser criada (ou que já existe)
 data "aws_ssoadmin_instances" "sso_instance" {}
 
 
-# ------------------------------------------------------------------
-# 2. DEFINIR UM PERMISSION SET (Conjunto de Permissões)
-# ------------------------------------------------------------------
-
-# Cria um Permission Set de 'Acesso de Administrador'
+# Admin Permission Set
 resource "aws_ssoadmin_permission_set" "admin_access" {
   name             = "AdministratorAccess"
-  description      = "Acesso total aos serviços AWS."
-  instance_arn     = data.aws_ssoadmin_instances.sso_instance.arns[0]
-  session_duration = "PT4H" # Duração da sessão de 4 horas
+  description      = "Full access to AWS services."
+  instance_arn     = tolist(data.aws_ssoadmin_instances.sso_instance.arns)[0]
+  session_duration = "PT4H"
 }
 
-# Anexa a política gerenciada 'AdministratorAccess' ao Permission Set
-resource "aws_ssoadmin_permission_set_inline_policy" "admin_access_policy" {
-  instance_arn     = data.aws_ssoadmin_instances.sso_instance.arns[0]
+resource "aws_ssoadmin_managed_policy_attachment" "admin_access_policy" {
+  instance_arn       = tolist(data.aws_ssoadmin_instances.sso_instance.arns)[0]
   permission_set_arn = aws_ssoadmin_permission_set.admin_access.arn
-  # Anexa a política gerenciada da AWS
-  inline_policy = "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"*\",\"Resource\":\"*\"}]}"
+  managed_policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
-# ------------------------------------------------------------------
-# 3. ATRIBUIR O PERMISSION SET ÀS CONTAS/OUs
-# ------------------------------------------------------------------
-
-# Atribui o Permission Set 'AdministratorAccess' à OU de Workloads.
-# Isso significa que qualquer usuário/grupo atribuído a este Permission Set
-# terá esse acesso em TODAS as contas sob a OU Workloads.
-resource "aws_ssoadmin_account_assignment" "workloads_admin_group" {
-  instance_arn       = data.aws_ssoadmin_instances.sso_instance.arns[0]
-  permission_set_arn = aws_ssoadmin_permission_set.admin_access.arn
-
-  # Tipo de Entidade (GROUP ou USER)
-  target_type = "AWS_ORGANIZATIONAL_UNIT"
-  target_id   = aws_organizations_organizational_unit.workloads.id # ID da OU 'Workloads'
-
-  # ID da Entidade (Grupo ou Usuário)
-  principal_type = "GROUP"
-  # O nome ou ID do grupo que você criará no IAM Identity Center ou no seu IdP externo.
-  # Você precisará configurar isso manualmente ou usar recursos mais avançados (Identity Store).
-  principal_id = "Seu-Grupo-Admin-Criado-Manualmente-ou-Via-SCIM" 
+# Read-Only Permission Set
+resource "aws_ssoadmin_permission_set" "read_only_access" {
+  name             = "ReadOnlyAccess"
+  description      = "Read-only access for auditing purposes."
+  instance_arn     = tolist(data.aws_ssoadmin_instances.sso_instance.arns)[0]
+  session_duration = "PT8H"
 }
+
+resource "aws_ssoadmin_managed_policy_attachment" "read_only_access_policy" {
+  instance_arn       = tolist(data.aws_ssoadmin_instances.sso_instance.arns)[0]
+  permission_set_arn = aws_ssoadmin_permission_set.read_only_access.arn
+  managed_policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+}
+
+# SSO Assignments (Per-Account)
+# Target types are AWS_ACCOUNT. Map User/Group IDs to proper target_ids.
+
+# Example assignments (uncomment/adjust principal_id):
+# resource "aws_ssoadmin_account_assignment" "dev_admin" {
+#   instance_arn       = tolist(data.aws_ssoadmin_instances.sso_instance.arns)[0]
+#   permission_set_arn = aws_ssoadmin_permission_set.admin_access.arn
+#   target_type        = "AWS_ACCOUNT"
+#   target_id          = aws_organizations_account.dev_security.id
+#   principal_type     = "GROUP"
+#   principal_id       = "YOUR-GROUP-ID-HERE"
+# }
+
+# resource "aws_ssoadmin_account_assignment" "audit_readonly" {
+#   instance_arn       = tolist(data.aws_ssoadmin_instances.sso_instance.arns)[0]
+#   permission_set_arn = aws_ssoadmin_permission_set.read_only_access.arn
+#   target_type        = "AWS_ACCOUNT"
+#   target_id          = aws_organizations_account.audit.id
+#   principal_type     = "GROUP"
+#   principal_id       = "YOUR-AUDIT-GROUP-ID-HERE"
+# }
