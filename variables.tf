@@ -13,6 +13,7 @@ variable "organization_name" {
 variable "master_account_email" {
   description = "Management Account email (immutable)."
   type        = string
+  default     = "ravanreis@gmail.com"
 }
 
 variable "org_prefix" {
@@ -44,3 +45,5 @@ variable "sandbox_budget_limit" {
   type        = number
   default     = 100.00
 }
+
+

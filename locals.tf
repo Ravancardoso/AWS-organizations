@@ -8,6 +8,5 @@ locals {
     Owner       = "Ravan Cardoso"
     ManagedBy   = "Terraform"
     Departament = "Security"
-    Custo       = "100.00"
   }
 }
